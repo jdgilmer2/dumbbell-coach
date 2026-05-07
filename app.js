@@ -1,5 +1,6 @@
 const STORAGE_KEY = "dumbbellCoach.sessions.v1";
 const HEALTH_STORAGE_KEY = "dumbbellCoach.health.v1";
+const THEME_STORAGE_KEY = "dumbbellCoach.theme.v1";
 
 const workouts = [
   {
@@ -157,7 +158,8 @@ const elements = {
   exportData: document.querySelector("#exportData"),
   importData: document.querySelector("#importData"),
   importHealth: document.querySelector("#importHealth"),
-  healthSummary: document.querySelector("#healthSummary")
+  healthSummary: document.querySelector("#healthSummary"),
+  themeToggle: document.querySelector("#themeToggle")
 };
 
 function loadSessions() {
@@ -192,6 +194,21 @@ function emptyHealthData() {
     latestWeightDate: null,
     daily: {}
   };
+}
+
+function loadTheme() {
+  return localStorage.getItem(THEME_STORAGE_KEY) || "dark";
+}
+
+function applyTheme(theme) {
+  document.body.dataset.theme = theme;
+  elements.themeToggle.textContent = theme === "dark" ? "Light mode" : "Dark mode";
+}
+
+function toggleTheme() {
+  const nextTheme = document.body.dataset.theme === "dark" ? "light" : "dark";
+  localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+  applyTheme(nextTheme);
 }
 
 function todayString() {
@@ -650,6 +667,7 @@ elements.fillExample.addEventListener("click", fillExample);
 elements.exportData.addEventListener("click", exportDataFile);
 elements.importData.addEventListener("change", importDataFile);
 elements.importHealth.addEventListener("change", importHealthFile);
+elements.themeToggle.addEventListener("click", toggleTheme);
 
 elements.sessionForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -669,6 +687,7 @@ elements.resetData.addEventListener("click", () => {
 });
 
 elements.sessionDate.value = todayString();
+applyTheme(loadTheme());
 renderWorkout();
 renderHistory();
 renderHealthSummary();

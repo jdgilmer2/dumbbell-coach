@@ -9,6 +9,25 @@
   --amber: #b25c20;
   --danger: #a33a3a;
   --shadow: 0 18px 40px rgba(20, 24, 31, 0.08);
+  --input: #ffffff;
+  --soft: #fbfbf8;
+  --topbar: #fdfdfb;
+}
+
+body[data-theme="dark"] {
+  --bg: #0e1117;
+  --panel: #171b23;
+  --ink: #eef2f7;
+  --muted: #a1a9b6;
+  --line: #2b3340;
+  --accent: #4cc38f;
+  --accent-strong: #7de1b2;
+  --amber: #e0a35a;
+  --danger: #ff7b7b;
+  --shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+  --input: #10141b;
+  --soft: #111720;
+  --topbar: #121722;
 }
 
 * {
@@ -32,7 +51,7 @@ body {
   border-bottom: 1px solid var(--line);
   background:
     linear-gradient(135deg, rgba(31, 122, 92, 0.12), transparent 42%),
-    #fdfdfb;
+    var(--topbar);
 }
 
 h1,
@@ -66,9 +85,15 @@ h2 {
   padding: 10px 14px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #fff;
+  background: var(--panel);
   font-weight: 800;
   white-space: nowrap;
+}
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .layout {
@@ -117,7 +142,7 @@ footer p {
   padding: 14px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #fbfbf8;
+  background: var(--soft);
 }
 
 .stat-label {
@@ -156,10 +181,18 @@ button {
   cursor: pointer;
 }
 
+.theme-toggle {
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--ink);
+}
+
 .icon-button {
   width: 42px;
   border: 1px solid var(--line);
-  background: #fff;
+  background: var(--panel);
+  color: var(--ink);
   font-size: 1.6rem;
   line-height: 1;
 }
@@ -179,7 +212,7 @@ button {
 .file-button {
   padding: 0 14px;
   border: 1px solid var(--line);
-  background: #fff;
+  background: var(--panel);
   color: var(--ink);
 }
 
@@ -218,7 +251,7 @@ button {
 .history-card {
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #fbfbf8;
+  background: var(--soft);
 }
 
 .exercise-card {
@@ -268,7 +301,7 @@ select {
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 10px 11px;
-  background: #fff;
+  background: var(--input);
   color: var(--ink);
   font: inherit;
 }
@@ -285,7 +318,7 @@ textarea {
   padding: 12px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #fbfbf8;
+  background: var(--soft);
 }
 
 .log-row label {
@@ -331,8 +364,8 @@ textarea {
 .history-meta span {
   padding: 5px 8px;
   border-radius: 8px;
-  background: #fff;
-  color: #313846;
+  background: var(--panel);
+  color: var(--ink);
   font-size: 0.82rem;
   font-weight: 800;
 }
@@ -349,7 +382,7 @@ textarea {
   padding: 14px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #fbfbf8;
+  background: var(--soft);
 }
 
 .health-tile span {
@@ -369,7 +402,7 @@ textarea {
   border: 1px dashed var(--line);
   border-radius: 8px;
   color: var(--muted);
-  background: #fbfbf8;
+  background: var(--soft);
 }
 
 footer {
@@ -403,6 +436,11 @@ footer {
 @media (max-width: 560px) {
   .topbar,
   .section-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .top-actions {
     align-items: stretch;
     flex-direction: column;
   }
