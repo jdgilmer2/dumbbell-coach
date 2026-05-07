@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dumbbell Coach</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Adjustable dumbbells + bench</p>
+        <h1>Dumbbell Coach</h1>
+      </div>
+      <div class="summary-pill" id="nextWorkoutPill">Next: Workout A</div>
+    </header>
+
+    <main class="layout">
+      <section class="panel intro-panel">
+        <div class="intro-copy">
+          <h2>Train steady. Track honestly. Add weight when you earn it.</h2>
+          <p>
+            Start with the suggested workout, log the weight and reps you actually get,
+            then let the app recommend what to do next time.
+          </p>
+        </div>
+        <div class="status-grid">
+          <div>
+            <span class="stat-label">Sessions</span>
+            <strong id="sessionCount">0</strong>
+          </div>
+          <div>
+            <span class="stat-label">Last trained</span>
+            <strong id="lastTrained">None</strong>
+          </div>
+          <div>
+            <span class="stat-label">Best streak</span>
+            <strong id="bestStreak">0</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Today</p>
+            <h2 id="workoutTitle">Workout A</h2>
+          </div>
+          <div class="control-row">
+            <button class="icon-button" id="previousWorkout" type="button" title="Previous workout">&lsaquo;</button>
+            <button class="icon-button" id="nextWorkout" type="button" title="Next workout">&rsaquo;</button>
+          </div>
+        </div>
+        <p class="helper" id="workoutFocus"></p>
+        <div id="exerciseList" class="exercise-list"></div>
+      </section>
+
+      <section class="panel log-panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Log</p>
+            <h2>Enter your first run</h2>
+          </div>
+          <button class="secondary-button" id="fillExample" type="button">Example</button>
+        </div>
+        <form id="sessionForm">
+          <label>
+            Session date
+            <input id="sessionDate" name="sessionDate" type="date" required>
+          </label>
+
+          <div id="logRows" class="log-rows"></div>
+
+          <label>
+            Notes
+            <textarea id="sessionNotes" rows="3" placeholder="Energy, soreness, form notes, anything that felt too easy or too heavy."></textarea>
+          </label>
+
+          <div class="button-row">
+            <button class="primary-button" type="submit">Save Session</button>
+            <button class="secondary-button" id="clearForm" type="button">Clear</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Coach</p>
+            <h2>Next-time recommendations</h2>
+          </div>
+        </div>
+        <div id="recommendations" class="recommendations empty-state">
+          Log a session and I will suggest what to change next time.
+        </div>
+      </section>
+
+      <section class="panel progress-panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Progress</p>
+            <h2>History</h2>
+          </div>
+          <button class="danger-button" id="resetData" type="button">Reset Data</button>
+        </div>
+        <div id="history" class="history empty-state">No sessions saved yet.</div>
+      </section>
+    </main>
+
+    <footer>
+      <p>
+        Keep 1-2 reps in reserve on most sets. Stop if you feel sharp pain, chest pain,
+        dizziness, or anything that feels wrong.
+      </p>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>
