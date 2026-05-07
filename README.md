@@ -8,6 +8,7 @@ A small static web app for adjustable dumbbells and a bench.
 - Lets you log weight, best reps, and RPE for each exercise.
 - Recommends whether to increase, hold, or reduce weight next time.
 - Saves history in browser local storage.
+- Exports/imports `workout-data.json` for Codex automation review.
 - Tracks sessions, last trained date, and a simple consistency streak.
 
 ## How to use
@@ -21,6 +22,9 @@ Start with Workout A. Use the first session as a baseline:
 3. Stop most sets with 1-2 good reps left.
 4. Enter weight, best reps, and RPE.
 5. Follow the next-time recommendation.
+
+After logging, use **Export JSON** and save the file as `workout-data.json`
+in this folder if you want the Codex automation to review your latest workout.
 
 ## Safety note
 

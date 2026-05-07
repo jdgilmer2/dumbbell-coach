@@ -152,7 +152,9 @@ const elements = {
   clearForm: document.querySelector("#clearForm"),
   resetData: document.querySelector("#resetData"),
   fillExample: document.querySelector("#fillExample"),
-  sessionNotes: document.querySelector("#sessionNotes")
+  sessionNotes: document.querySelector("#sessionNotes"),
+  exportData: document.querySelector("#exportData"),
+  importData: document.querySelector("#importData")
 };
 
 function loadSessions() {
@@ -405,6 +407,41 @@ function fillExample() {
   elements.sessionNotes.value = "First baseline. Felt good, but rows were harder than expected.";
 }
 
+function exportDataFile() {
+  const payload = {
+    exportedAt: new Date().toISOString(),
+    appVersion: 1,
+    sessions: loadSessions()
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "workout-data.json";
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+async function importDataFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  try {
+    const text = await file.text();
+    const payload = JSON.parse(text);
+    const sessions = Array.isArray(payload) ? payload : payload.sessions;
+    if (!Array.isArray(sessions)) {
+      throw new Error("No sessions array found.");
+    }
+    saveSessions(sessions);
+    renderHistory();
+  } catch (error) {
+    window.alert(`Could not import workout data: ${error.message}`);
+  } finally {
+    event.target.value = "";
+  }
+}
+
 elements.previousWorkout.addEventListener("click", () => {
   currentWorkoutIndex = (currentWorkoutIndex - 1 + workouts.length) % workouts.length;
   renderWorkout();
@@ -417,6 +454,8 @@ elements.nextWorkout.addEventListener("click", () => {
 
 elements.clearForm.addEventListener("click", clearForm);
 elements.fillExample.addEventListener("click", fillExample);
+elements.exportData.addEventListener("click", exportDataFile);
+elements.importData.addEventListener("change", importDataFile);
 
 elements.sessionForm.addEventListener("submit", (event) => {
   event.preventDefault();

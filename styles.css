@@ -175,11 +175,30 @@ button {
 }
 
 .secondary-button,
-.danger-button {
+.danger-button,
+.file-button {
   padding: 0 14px;
   border: 1px solid var(--line);
   background: #fff;
   color: var(--ink);
+}
+
+.file-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  border-radius: 8px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.file-button input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
 }
 
 .danger-button {

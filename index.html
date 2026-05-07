@@ -105,6 +105,26 @@
         </div>
         <div id="history" class="history empty-state">No sessions saved yet.</div>
       </section>
+
+      <section class="panel progress-panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Automation</p>
+            <h2>Coach data file</h2>
+          </div>
+          <div class="button-row">
+            <button class="secondary-button" id="exportData" type="button">Export JSON</button>
+            <label class="file-button">
+              Import JSON
+              <input id="importData" type="file" accept="application/json">
+            </label>
+          </div>
+        </div>
+        <p class="helper">
+          Export after logging workouts so the Codex coach automation can read your latest progress.
+          Save the file as <strong>workout-data.json</strong> in this app folder.
+        </p>
+      </section>
     </main>
 
     <footer>
