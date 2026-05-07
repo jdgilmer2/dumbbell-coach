@@ -95,6 +95,24 @@
         </div>
       </section>
 
+      <section class="panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Health</p>
+            <h2>Weight and cardio</h2>
+          </div>
+          <label class="file-button">
+            Import Health
+            <input id="importHealth" type="file" accept=".xml,.json,application/json,text/xml">
+          </label>
+        </div>
+        <p class="helper">
+          Import Apple Health <strong>export.xml</strong> or a JSON export to include weight,
+          steps, walking distance, active energy, and exercise minutes in coach reviews.
+        </p>
+        <div id="healthSummary" class="health-summary empty-state">No health data imported yet.</div>
+      </section>
+
       <section class="panel progress-panel">
         <div class="section-heading">
           <div>

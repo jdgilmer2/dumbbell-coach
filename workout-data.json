@@ -1,5 +1,12 @@
 {
   "exportedAt": null,
   "appVersion": 1,
-  "sessions": []
+  "sessions": [],
+  "health": {
+    "importedAt": null,
+    "source": null,
+    "latestWeightLb": null,
+    "latestWeightDate": null,
+    "daily": {}
+  }
 }

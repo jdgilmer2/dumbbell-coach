@@ -1,4 +1,5 @@
 const STORAGE_KEY = "dumbbellCoach.sessions.v1";
+const HEALTH_STORAGE_KEY = "dumbbellCoach.health.v1";
 
 const workouts = [
   {
@@ -154,7 +155,9 @@ const elements = {
   fillExample: document.querySelector("#fillExample"),
   sessionNotes: document.querySelector("#sessionNotes"),
   exportData: document.querySelector("#exportData"),
-  importData: document.querySelector("#importData")
+  importData: document.querySelector("#importData"),
+  importHealth: document.querySelector("#importHealth"),
+  healthSummary: document.querySelector("#healthSummary")
 };
 
 function loadSessions() {
@@ -167,6 +170,28 @@ function loadSessions() {
 
 function saveSessions(sessions) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
+}
+
+function loadHealthData() {
+  try {
+    return JSON.parse(localStorage.getItem(HEALTH_STORAGE_KEY)) || emptyHealthData();
+  } catch {
+    return emptyHealthData();
+  }
+}
+
+function saveHealthData(healthData) {
+  localStorage.setItem(HEALTH_STORAGE_KEY, JSON.stringify(healthData));
+}
+
+function emptyHealthData() {
+  return {
+    importedAt: null,
+    source: null,
+    latestWeightLb: null,
+    latestWeightDate: null,
+    daily: {}
+  };
 }
 
 function todayString() {
@@ -342,6 +367,47 @@ function renderHistory() {
   renderRecommendations(sessions.at(-1));
 }
 
+function renderHealthSummary() {
+  const health = loadHealthData();
+  const days = Object.entries(health.daily || {}).sort(([a], [b]) => a.localeCompare(b));
+
+  if (!health.importedAt || !days.length) {
+    elements.healthSummary.className = "health-summary empty-state";
+    elements.healthSummary.textContent = "No health data imported yet.";
+    return;
+  }
+
+  const recentDays = days.slice(-7);
+  const totals = recentDays.reduce((sum, [, day]) => {
+    sum.steps += Number(day.steps || 0);
+    sum.distanceMiles += Number(day.distanceMiles || 0);
+    sum.activeEnergyCalories += Number(day.activeEnergyCalories || 0);
+    sum.exerciseMinutes += Number(day.exerciseMinutes || 0);
+    return sum;
+  }, { steps: 0, distanceMiles: 0, activeEnergyCalories: 0, exerciseMinutes: 0 });
+
+  const dayCount = Math.max(1, recentDays.length);
+  elements.healthSummary.className = "health-summary";
+  elements.healthSummary.innerHTML = `
+    <div class="health-tile">
+      <span>Latest weight</span>
+      <strong>${health.latestWeightLb ? `${roundToHalf(health.latestWeightLb)} lb` : "None"}</strong>
+    </div>
+    <div class="health-tile">
+      <span>7-day avg steps</span>
+      <strong>${Math.round(totals.steps / dayCount).toLocaleString()}</strong>
+    </div>
+    <div class="health-tile">
+      <span>7-day distance</span>
+      <strong>${totals.distanceMiles.toFixed(1)} mi</strong>
+    </div>
+    <div class="health-tile">
+      <span>7-day exercise</span>
+      <strong>${Math.round(totals.exerciseMinutes)} min</strong>
+    </div>
+  `;
+}
+
 function calculateBestStreak(sessions) {
   const dates = [...new Set(sessions.map((session) => session.date))].sort();
   if (!dates.length) return 0;
@@ -408,10 +474,12 @@ function fillExample() {
 }
 
 function exportDataFile() {
+  const health = loadHealthData();
   const payload = {
     exportedAt: new Date().toISOString(),
     appVersion: 1,
-    sessions: loadSessions()
+    sessions: loadSessions(),
+    health
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -434,12 +502,137 @@ async function importDataFile(event) {
       throw new Error("No sessions array found.");
     }
     saveSessions(sessions);
+    if (payload.health) {
+      saveHealthData(payload.health);
+      renderHealthSummary();
+    }
     renderHistory();
   } catch (error) {
     window.alert(`Could not import workout data: ${error.message}`);
   } finally {
     event.target.value = "";
   }
+}
+
+async function importHealthFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  try {
+    const text = await file.text();
+    const healthData = file.name.toLowerCase().endsWith(".xml")
+      ? parseAppleHealthXml(text)
+      : parseHealthJson(text);
+    saveHealthData(healthData);
+    renderHealthSummary();
+  } catch (error) {
+    window.alert(`Could not import health data: ${error.message}`);
+  } finally {
+    event.target.value = "";
+  }
+}
+
+function parseAppleHealthXml(text) {
+  const doc = new DOMParser().parseFromString(text, "application/xml");
+  const parserError = doc.querySelector("parsererror");
+  if (parserError) {
+    throw new Error("Apple Health XML could not be parsed.");
+  }
+
+  const health = emptyHealthData();
+  health.importedAt = new Date().toISOString();
+  health.source = "apple-health-export-xml";
+
+  doc.querySelectorAll("Record").forEach((record) => {
+    const type = record.getAttribute("type") || "";
+    const date = toDateKey(record.getAttribute("startDate") || record.getAttribute("creationDate"));
+    const rawValue = Number(record.getAttribute("value"));
+    const unit = record.getAttribute("unit") || "";
+    if (!date || Number.isNaN(rawValue)) return;
+
+    const day = getHealthDay(health, date);
+    if (type.includes("BodyMass")) {
+      const pounds = unit === "kg" ? rawValue * 2.2046226218 : rawValue;
+      health.latestWeightLb = pounds;
+      health.latestWeightDate = date;
+      day.weightLb = pounds;
+    } else if (type.includes("StepCount")) {
+      day.steps += rawValue;
+    } else if (type.includes("DistanceWalkingRunning")) {
+      day.distanceMiles += unit === "km" ? rawValue * 0.621371 : rawValue;
+    } else if (type.includes("ActiveEnergyBurned")) {
+      day.activeEnergyCalories += unit === "kJ" ? rawValue * 0.239006 : rawValue;
+    } else if (type.includes("AppleExerciseTime")) {
+      day.exerciseMinutes += rawValue;
+    }
+  });
+
+  return health;
+}
+
+function parseHealthJson(text) {
+  const payload = JSON.parse(text);
+  if (payload.health?.daily) return payload.health;
+  if (payload.daily) return payload;
+
+  const health = emptyHealthData();
+  health.importedAt = new Date().toISOString();
+  health.source = "generic-health-json";
+  const records = Array.isArray(payload) ? payload : findArray(payload);
+  if (!records) throw new Error("No health records found in JSON.");
+
+  records.forEach((record) => {
+    const date = toDateKey(record.date || record.startDate || record.start || record.creationDate);
+    if (!date) return;
+    const day = getHealthDay(health, date);
+    const type = String(record.type || record.name || record.metric || "").toLowerCase();
+    const value = Number(record.value ?? record.qty ?? record.quantity ?? record.total);
+    if (Number.isNaN(value)) return;
+
+    if (type.includes("weight") || type.includes("bodymass")) {
+      const pounds = String(record.unit || "").toLowerCase() === "kg" ? value * 2.2046226218 : value;
+      health.latestWeightLb = pounds;
+      health.latestWeightDate = date;
+      day.weightLb = pounds;
+    } else if (type.includes("step")) {
+      day.steps += value;
+    } else if (type.includes("distance")) {
+      day.distanceMiles += String(record.unit || "").toLowerCase() === "km" ? value * 0.621371 : value;
+    } else if (type.includes("active") || type.includes("calorie") || type.includes("energy")) {
+      day.activeEnergyCalories += value;
+    } else if (type.includes("exercise")) {
+      day.exerciseMinutes += value;
+    }
+  });
+
+  return health;
+}
+
+function findArray(value) {
+  if (Array.isArray(value)) return value;
+  if (!value || typeof value !== "object") return null;
+  for (const child of Object.values(value)) {
+    const found = findArray(child);
+    if (found) return found;
+  }
+  return null;
+}
+
+function getHealthDay(health, date) {
+  health.daily[date] ||= {
+    steps: 0,
+    distanceMiles: 0,
+    activeEnergyCalories: 0,
+    exerciseMinutes: 0,
+    weightLb: null
+  };
+  return health.daily[date];
+}
+
+function toDateKey(value) {
+  if (!value) return null;
+  const match = String(value).match(/\d{4}-\d{2}-\d{2}/);
+  return match ? match[0] : null;
 }
 
 elements.previousWorkout.addEventListener("click", () => {
@@ -456,6 +649,7 @@ elements.clearForm.addEventListener("click", clearForm);
 elements.fillExample.addEventListener("click", fillExample);
 elements.exportData.addEventListener("click", exportDataFile);
 elements.importData.addEventListener("change", importDataFile);
+elements.importHealth.addEventListener("change", importHealthFile);
 
 elements.sessionForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -477,3 +671,4 @@ elements.resetData.addEventListener("click", () => {
 elements.sessionDate.value = todayString();
 renderWorkout();
 renderHistory();
+renderHealthSummary();

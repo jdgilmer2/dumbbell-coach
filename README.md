@@ -9,6 +9,7 @@ A small static web app for adjustable dumbbells and a bench.
 - Recommends whether to increase, hold, or reduce weight next time.
 - Saves history in browser local storage.
 - Exports/imports `workout-data.json` for Codex automation review.
+- Imports Apple Health `export.xml` or generic health JSON for weight/cardio summaries.
 - Tracks sessions, last trained date, and a simple consistency streak.
 
 ## How to use
@@ -25,6 +26,19 @@ Start with Workout A. Use the first session as a baseline:
 
 After logging, use **Export JSON** and save the file as `workout-data.json`
 in this folder if you want the Codex automation to review your latest workout.
+
+## Apple Watch / Health data
+
+A static web app cannot directly read Apple Watch or Apple Health data. Use one
+of these import paths:
+
+1. On iPhone, open Health, tap your profile picture, choose **Export All Health
+   Data**, unzip the export, then import `apple_health_export/export.xml`.
+2. Use an app such as Health Auto Export or HealthSave to export JSON, then
+   import that JSON.
+
+After importing health data, use **Export JSON** to include it in
+`workout-data.json` for the weekly Codex coach automation.
 
 ## Safety note
 
